@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/chat",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 458,
+      "bodyTextHash": "b443525fce1376d2a492aba71060bd0840f48dbdef54e71d3a178d2a59e95ff1",
+      "bodyTextPrefix": "Known Poll Home Hall of Clowns Forum Chat Friends Servers Groups",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/chat.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 448,
+      "bodyTextHash": "24a2fb85d6572b701e5124c37958593791fda3712c24340cd1f44cdf31835a15",
+      "bodyTextPrefix": "Known Poll Eintreten Chat O @orion · vor 51 Min. Live: Famous si",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/chat-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/chat.json"
+}

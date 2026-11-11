@@ -1,0 +1,5 @@
+app.social:style/Theme.Social = 0x7f030000
+app.social:xml/network_security_config = 0x7f040000
+app.social:string/app_name = 0x7f020000
+app.social:mipmap/ic_launcher_round = 0x7f010001
+app.social:mipmap/ic_launcher = 0x7f010000

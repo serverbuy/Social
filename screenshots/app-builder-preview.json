@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 1681,
+      "bodyTextHash": "c4fa86d8894fccad85d7c3a3474eb6414ea21f395d435d8163ed32cf18bee341",
+      "bodyTextPrefix": "Known Poll Home Hall Forum Chat Friends Servers Groups Profil An",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 1681,
+      "bodyTextHash": "96bc0c9ebce6fefc067d70db8e563dd55d0d4d4ef7fe3f735e9d13f3d447b2d0",
+      "bodyTextPrefix": "Known Poll Anmelden Famous Richest Duo Most Famous Alle 01 @nova",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

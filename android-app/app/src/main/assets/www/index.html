@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>@social</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; min-height: 100%;
+      font-family: system-ui, -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
+      background: linear-gradient(165deg, #3a3c44 0%, #313338 50%, #232428 100%);
+      color: #f2f3f5;
+    }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 400px;
+      background: #2b2d31;
+      border-radius: 16px;
+      padding: 32px 24px 28px;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    h1 {
+      font-size: 26px;
+      margin: 18px 0 8px;
+    }
+    p { color: #b5bac1; font-size: 15px; line-height: 1.45; margin: 0 0 22px; }
+    a.btn, button.btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 44px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .primary { background: #5865f2; color: #fff; }
+    .ghost { background: #1e1f22; color: #f2f3f5; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <p class="brand">@social</p>
+    <h1>Willkommen zurück!</h1>
+    <p>Die Android-App ist bereit. Nach dem Veröffentlichen öffnet @social hier direkt — inkl. Login, Profilbild, Chat und Rankings.</p>
+    <a class="btn primary" id="open" href="#">@social öffnen</a>
+  </main>
+  <script>
+    // When a live origin is injected later, jump there.
+    var LIVE = "";
+    var a = document.getElementById("open");
+    if (LIVE) {
+      a.href = LIVE;
+      location.replace(LIVE);
+    } else {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
+    }
+  </script>
+</body>
+</html>

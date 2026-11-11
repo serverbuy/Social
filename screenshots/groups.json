@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/groups",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 52,
+      "bodyTextHash": "0e54582fda6357ea7c248904806ede4495080c1e1850a6272739b8697a061aa8",
+      "bodyTextPrefix": "Known Poll Known Poll Weiter mit Google Weiter mit X",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/groups.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 52,
+      "bodyTextHash": "0e54582fda6357ea7c248904806ede4495080c1e1850a6272739b8697a061aa8",
+      "bodyTextPrefix": "Known Poll Known Poll Weiter mit Google Weiter mit X",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/groups-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/groups.json"
+}

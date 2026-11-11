@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; background: #333; }
+  .row { display: flex; gap: 16px; padding: 16px; align-items: end; }
+  .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .label { color: #ccc; font: 11px/1 sans-serif; }
+  .tile { background: #080808; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="cell">
+    <svg class="tile" width="16" height="16" viewBox="0 0 32 32"><rect width="32" height="32" fill="#080808"/><path fill="#f4f4f0" d="M8 6h5.5v8.15L21.15 6H26L16.7 16 26 26h-4.85L13.5 17.85V26H8V6z"/></svg>
+    <div class="label">A 16 current</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="#080808"/><path fill="#f4f4f0" d="M8 6h5.5v8.15L21.15 6H26L16.7 16 26 26h-4.85L13.5 17.85V26H8V6z"/></svg>
+    <div class="label">A 32 current</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="16" height="16" viewBox="0 0 32 32"><rect width="32" height="32" fill="#080808"/><path fill="#f4f4f0" d="M8 5.5h5.25v6.2L21.7 5.5H26L16.2 16 26 26.5h-4.3L13.25 20.3V26.5H8V5.5z"/></svg>
+    <div class="label">B 16 open</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="#080808"/><path fill="#f4f4f0" d="M8 5.5h5.25v6.2L21.7 5.5H26L16.2 16 26 26.5h-4.3L13.25 20.3V26.5H8V5.5z"/></svg>
+    <div class="label">B 32 open</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="16" height="16" viewBox="0 0 16 16"><rect width="16" height="16" fill="#080808"/><path fill="#f4f4f0" d="M3 2h3v5L11 2h2L8 8l5 6h-2L6 9v5H3V2z"/></svg>
+    <div class="label">C 16 16vb</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="32" height="32" viewBox="0 0 16 16"><rect width="16" height="16" fill="#080808"/><path fill="#f4f4f0" d="M3 2h3v5L11 2h2L8 8l5 6h-2L6 9v5H3V2z"/></svg>
+    <div class="label">C 32 16vb</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="16" height="16" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#080808"/><path fill="#f4f4f0" d="M3 2h3v5L11 2h2L8 8l5 6h-2L6 9v5H3V2z"/></svg>
+    <div class="label">D 16 crisp</div>
+  </div>
+  <div class="cell">
+    <svg class="tile" width="32" height="32" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#080808"/><path fill="#f4f4f0" d="M3 2h3v5L11 2h2L8 8l5 6h-2L6 9v5H3V2z"/></svg>
+    <div class="label">D 32 crisp</div>
+  </div>
+</div>
+</body>
+</html>

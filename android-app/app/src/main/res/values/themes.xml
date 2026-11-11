@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Social" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:statusBarColor">#313338</item>
+        <item name="android:navigationBarColor">#1e1f22</item>
+        <item name="android:windowBackground">#313338</item>
+        <item name="android:colorPrimary">#5865F2</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

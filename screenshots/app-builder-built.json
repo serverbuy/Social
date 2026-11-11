@@ -1,0 +1,40 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 1975,
+      "bodyTextHash": "3cfa4120e32e6bd9f3b222e8b01c184df14fd46eeb761ac54c1f3c687a93f63e",
+      "bodyTextPrefix": "KNOWN Poll Home Hall of Clowns Forum Chat Friends Servers Groups",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 1965,
+      "bodyTextHash": "396042941662f6bda6b81eeabccb80b8d3dc36a38e29e88b3eef270325ed58d9",
+      "bodyTextPrefix": "KNOWN Poll Eintreten MOST FAMOUS RICHEST BEST DUO COMMUNITY-VOTE",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": true,
+  "baselineReasons": [
+    "mobile: body text replaced (similar length, page start changed)"
+  ]
+}

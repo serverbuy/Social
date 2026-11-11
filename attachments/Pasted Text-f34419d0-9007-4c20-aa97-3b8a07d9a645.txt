@@ -1,0 +1,188 @@
+PROMPT – Known Poll / Scene Community Platform (v2)
+Du bist Senior Product Designer und Product Architect. Spezifiziere die Plattform Known Poll: ein Szenen-Forum mit Live-Rankings, Donations, Chat, Freundesliste und eigenen Servern.
+Keine Feature-Liste ohne Produktlogik. Jede Funktion braucht Zweck, Regeln und UX.
+1. Produktkern
+Known Poll ist eine Community-Plattform für Szenen:
+oben laufen die öffentlichen Rankings
+darunter Forum, Chat, Freunde, Server
+Status entsteht durch Votes, Donations, Connections und sichtbare Aktivität
+Ton: urban, szenenaffin, kompetitiv, klar.
+Optik: dunkel, editorial, high-contrast. Desktop-first, voll responsive, swipe-fähig.
+2. Identity: ein Username, für immer
+Identität funktioniert wie bei Discord, aber strikter.
+Jede:r User wählt genau einen Username.
+Der Username ist einzigartig, öffentlich und dauerhaft.
+Kein späteres Freigeben für andere, kein Handle-Recycling.
+Display-Name darf sich ändern, der @username nicht.
+User werden ausschließlich über den Username gefunden und hinzugefügt: @name.
+Reservierte/gesperrte Namen, Profanity-Filter, Claim nur nach Account-Verifizierung.
+Onboarding-Schritt 1: Username wählen. Danach erst Profil.
+Beispiel: @nova bleibt @nova. Bio, Bild und Connections können sich ändern – der Name nicht.
+3. Top-Layer: Famous / Richest / Best Duo
+Wichtig:
+Most Famous, Richest und Best Duo sind keine Seiten-Kategorien in der Navigation links.
+Sie liegen ganz oben als horizontaler Swipe-Deck.
+Verhalten:
+Oben fix: 3 Panels nebeneinander
+Swipe / Drag von links nach rechts zwischen:
+Most Famous
+Richest
+Best Duo
+Indikator-Dots oder Segmented Control oben
+Beim Wechsel bleibt der Rest der Seite (Feed, Chat-Peek, Forum-Peek) stehen
+Mobile: echtes Swipe-Gesture
+Desktop: Swipe + Pfeile + Keyboard
+Jedes Panel zeigt:
+aktuelles Top-Ranking
+Trend
+CTA (Vote / Donate / View Duo)
+Quick-Open auf das volle Leaderboard
+Die eigentliche App-Navigation (Home, Hall of Clowns, Forum, Chat, Friends, Servers, Profile) sitzt darunter oder links, nicht vermischt mit den drei Ranking-Welten.
+Most Famous
+Community voted, wer am bekanntesten ist
+1 Stimme pro User und Zeitraum
+Live-Ranking, 24h/7-Tage-Trend
+Profilkarte + Discussion-Thread
+Richest
+Donation-Leaderboard, kein reines Voting
+Spenden schieben das Ranking
+Overbid: höhere Summe überholt andere
+sichtbar: Total, Last Donation, Top Donor, Last Overtake
+nur verifizierte Payments zählen
+öffentliche Donation-Historie
+Best Duo
+zwei Profile als Duo
+Community voted das beste Duo
+gemeinsame Duo-Seite: Bilder, Bio, Thread, Score
+Nominierungen für alle drei Welten laufen über Moderation.
+4. Hall of Clowns
+Eigene, zugangsbeschränkte Fläche.
+Zweck: Archiv / Inside-Bereich. Man kann Dinge anschauen, aber nicht jede:r kommt rein.
+Regeln:
+Sichtbar in der Navigation nur für User mit Zugang
+Für alle anderen: Locked-State („Invite only“ / „Restricted“)
+Zugang über:
+Invite-Link
+Freigabe durch Admin/Mod
+optionale Role-Gates (Verified, Server-Owner, bestimmte Scene)
+Inhalt: Clips, Posts, Screens, Rank-Fails, Inside-Jokes, Archive-Cards
+Default: Read-heavy. Schreiben nur für freigeschaltete Rollen.
+Jeder Eintrag hat Sichtbarkeit: Hall-only, nie automatisch im öffentlichen Feed
+Audit-Log: wer Zugriff hat, wer etwas eingestellt hat
+UX:
+eigene Gallery/List
+Filter nach Datum, Tag, Poster
+kein öffentliches Sharing nach außen, außer explizit erlaubt
+5. Profile
+Jedes Profil enthält:
+festes @username
+änderbarer Display-Name
+Profilbild + optionales Banner
+Bio
+Scene-Tags
+Connections
+sichtbare Rankings (Platz in Famous / Richest / Duo, falls vorhanden)
+Friends-Count, Server-Count
+Activity (öffentlich konfigurierbar)
+Connections
+Liste von verknüpften Leuten / Accounts / Duos
+Request → Accept
+auf dem Profil sichtbar, wenn nicht privat gestellt
+Connections sind nicht automatisch Friends, können aber daraus entstehen
+Datenschutz-Stufen:
+Public
+Friends
+Server-only
+Private
+6. Freunde über Username
+User A gibt @username ein → Add Friend
+Request landet bei User B
+Accept / Decline / Block
+Freundesliste: online-status, last seen optional, gemeinsame Server
+Direktchat nach akzeptierter Anfrage
+Suche nur über exakten oder prefix-Username, kein wildes People-Discovery ohne Consent
+7. Server + Gruppen
+Zwei Ebenen, klar getrennt.
+Server (Discord-Logik, aber aufgeräumter)
+User kann eigene Server erstellen
+Server hat: Name, Icon, Beschreibung, Sichtbarkeit (public / invite / private)
+Channels statt unübersichtlichem Chaos:
+Text
+Voice optional später
+Ranking-Channel (kann Famous/Richest/Duo-Widgets einbetten)
+Media
+Announcements
+Rollen und Permissions granular, aber mit guten Defaults
+Besser als Discord durch:
+klarere Channel-Hierarchie
+weniger Noise
+Ranking-Widgets nativ
+saubere Mobile-Gruppenansicht
+weniger versteckte Settings
+Moderations-Inbox statt verstreuter Tools
+Gruppen (WhatsApp-Logik)
+kleinere, leichte Chats
+erstellen aus Freundesliste
+Name, Bild, Mitglieder
+Admins, Mute, Pin, Media-Drawer
+keine komplexe Rollenwelt
+ideal für enge Circles, Events, Duo-Teams
+Regel: Server = Community-Raum. Gruppe = privater Kreis.
+8. Forum + Chat
+Forum:
+Boards nach Szene
+Threads zu Rankings, Events, Nominierungen, Hall-Themen (falls berechtigt)
+Quote, Mention per @username, Media, Embeds
+Chat:
+Global- oder Scene-Chat
+Friend-DMs
+Gruppenchats
+Server-Channels
+Live-Events: „@x hat @y bei Richest überholt“
+Moderation:
+Report, Mute, Kick, Ban, Slow-mode
+Hall-of-Clowns-Zugriff separat steuerbar
+9. Information Architecture
+Oben (Swipe, immer sichtbar auf Home):
+Most Famous · Richest · Best Duo
+Hauptnavigation:
+Home · Hall of Clowns · Forum · Friends · Servers · Groups · Profile
+Nicht in der Seiten-Kategorie:
+Famous / Richest / Best Duo
+10. Wichtige Flows
+Username claimen → Profil anlegen
+Oben zwischen Famous / Richest / Duo swipen
+Vote oder Donation/Overbid
+@user als Friend adden
+Connection auf Profil setzen
+Gruppe erstellen oder Server aufsetzen
+Hall of Clowns öffnen – nur mit Access
+Thread/Chat zur Ranking-Person öffnen
+11. Datenmodell grob
+User, UsernameClaim, Profile, Connection, Friendship, Candidate, Duo, Vote, Donation, RankSnapshot, Thread, Post, ChatMessage, Group, Server, Channel, Role, HallItem, HallAccess
+12. MVP vs V2
+MVP
+Username-Lock
+Top-Swipe Rankings
+Vote + Donate/Overbid
+Profile (Bild, Bio, Connections)
+Friend-Add per Username
+DMs + Groups
+1 Server-Typ mit Text-Channels
+Hall of Clowns als Invite-only Read-Bereich
+Basis-Moderation
+V2
+Voice
+feinere Server-Permissions
+Discovery für öffentliche Server
+Advanced Analytics
+Duo-Creator-Tools
+tiefere Hall-of-Clowns-Rollen
+13. Deliverables
+Tagline + Positionierung
+Sitemap
+Wireframe-Beschreibung: Home mit Top-Swipe, Ranking-Detail, Profile, Friends, Group, Server, Hall of Clowns
+Rechte-Matrix: wer sieht/schreibt Hall of Clowns, wer erstellt Server, wer nominiert
+Copy für Locked-States, Friend-Requests, Overbid, Username-Claim
+MVP-Scope in einer Tabelle
+Arbeite präzise und umsetzbar. Keine Feature-Romantik. Jede Fläche braucht Zugangsregel, leeren Zustand und Moderationsweg.

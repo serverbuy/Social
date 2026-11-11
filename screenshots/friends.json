@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/friends",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 83,
+      "bodyTextHash": "216919266f79f490e11362c322f43d10166ce10753c2361b7ee1d2af4850cb6f",
+      "bodyTextPrefix": "← Willkommen zurück! Melde dich an, um weiterzumachen. Anmelden ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/friends.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 83,
+      "bodyTextHash": "216919266f79f490e11362c322f43d10166ce10753c2361b7ee1d2af4850cb6f",
+      "bodyTextPrefix": "← Willkommen zurück! Melde dich an, um weiterzumachen. Anmelden ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/friends-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/friends.json"
+}

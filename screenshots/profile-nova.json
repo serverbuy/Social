@@ -1,0 +1,42 @@
+{
+  "url": "http://127.0.0.1:8080/u/nova",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 332,
+      "bodyTextHash": "1c3933cefbdd9ef6bfe4080087f40b381579e0965b6be52bee576fa54f6b055c",
+      "bodyTextPrefix": "Known Poll Home Hall of Clowns Forum Chat Friends Servers Groups",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. seed-kairo",
+        "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. seed-kairo"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/profile-nova.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Known Poll",
+      "hasCanvas": false,
+      "bodyTextLen": 322,
+      "bodyTextHash": "8b22c36662a937187a3dbb0ee2967dc9d2f5686e4b1a1f2fc28fdbb5bf238548",
+      "bodyTextPrefix": "Known Poll Eintreten N @nova Nova Chen Verified Headliner. Kein ",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. seed-kairo",
+        "Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version. seed-kairo"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/profile-nova-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/profile-nova.json"
+}
