@@ -52,27 +52,49 @@
       cursor: pointer;
     }
     .primary { background: #5865f2; color: #fff; }
+    input {
+      width: 100%; height: 44px; border-radius: 10px; border: 1px solid #1e1f22;
+      background: #1e1f22; color: #f2f3f5; padding: 0 14px; font-size: 15px; margin: 0 0 12px;
+    }
+    .err { color: #f23f43; font-size: 14px; margin: 12px 0 0; min-height: 1em; }
     .ghost { background: #1e1f22; color: #f2f3f5; margin-top: 10px; }
   </style>
 </head>
 <body>
   <main class="card">
     <p class="brand">@social</p>
-    <h1>Willkommen zurück!</h1>
-    <p>Die Android-App ist bereit. Nach dem Veröffentlichen öffnet @social hier direkt — inkl. Login, Profilbild, Chat und Rankings.</p>
-    <a class="btn primary" id="open" href="#">@social öffnen</a>
+    <h1>Willkommen!</h1>
+    <p id="msg">Gib einmal die Adresse deiner veröffentlichten @social-Seite ein. Die App merkt sie sich und öffnet sie danach direkt.</p>
+    <input id="url" type="url" inputmode="url" autocomplete="url" placeholder="https://deine-app.example.com" />
+    <button class="btn primary" id="open">@social öffnen</button>
+    <p id="err" class="err"></p>
   </main>
   <script>
-    // When a live origin is injected later, jump there.
+    // Set at build time (GitHub Actions variable APP_URL). Empty = ask the user.
     var LIVE = "";
-    var a = document.getElementById("open");
-    if (LIVE) {
-      a.href = LIVE;
-      location.replace(LIVE);
+    var KEY = "social_live_url";
+    function saved() { try { return localStorage.getItem(KEY) || ""; } catch (e) { return ""; } }
+    function normalize(u) {
+      u = (u || "").trim();
+      if (!u) return "";
+      if (!/^https?:\/\//i.test(u)) u = "https://" + u;
+      try { return new URL(u).toString(); } catch (e) { return ""; }
+    }
+    var reset = location.hash === "#reset";
+    var target = LIVE || (reset ? "" : saved());
+    if (target) {
+      location.replace(target);
     } else {
-      a.addEventListener("click", function (e) {
-        e.preventDefault();
-      });
+      var input = document.getElementById("url");
+      input.value = saved();
+      function go() {
+        var u = normalize(input.value);
+        if (!u) { document.getElementById("err").textContent = "Bitte eine gültige Adresse eingeben."; return; }
+        try { localStorage.setItem(KEY, u); } catch (e) {}
+        location.replace(u);
+      }
+      document.getElementById("open").addEventListener("click", go);
+      input.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
     }
   </script>
 </body>

@@ -1,7 +1,0 @@
-app.social.app-pngs-0 /workspace/android-app/app/build/generated/res/pngs/release
-app.social.app-resValues-1 /workspace/android-app/app/build/generated/res/resValues/release
-app.social.app-packageReleaseResources-2 /workspace/android-app/app/build/intermediates/incremental/release/packageReleaseResources/merged.dir
-app.social.app-packageReleaseResources-3 /workspace/android-app/app/build/intermediates/incremental/release/packageReleaseResources/stripped.dir
-app.social.app-release-4 /workspace/android-app/app/build/intermediates/merged_res/release/mergeReleaseResources
-app.social.app-main-5 /workspace/android-app/app/src/main/res
-app.social.app-release-6 /workspace/android-app/app/src/release/res

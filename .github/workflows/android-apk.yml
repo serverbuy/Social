@@ -1,0 +1,61 @@
+name: Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "android-app/**"
+      - ".github/workflows/android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      # Optional: set a repository variable APP_URL (Settings → Secrets and
+      # variables → Actions → Variables) so the app opens your site directly.
+      - name: Inject live URL
+        if: ${{ vars.APP_URL != '' }}
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          sed -i "s|var LIVE = \"\";|var LIVE = \"${APP_URL}\";|" android-app/app/src/main/assets/www/index.html
+          grep -n "var LIVE" android-app/app/src/main/assets/www/index.html
+
+      - name: Build APK
+        working-directory: android-app
+        run: gradle --no-daemon assembleRelease
+
+      - name: Rename APK
+        run: cp android-app/app/build/outputs/apk/release/app-release.apk social.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: social-apk
+          path: social.apk
+
+      - name: Publish release "latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest social.apk \
+            --title "@social Android-App" \
+            --notes "Automatisch gebaut aus ${GITHUB_SHA::7}. APK herunterladen und auf dem Handy installieren." \
+            --latest

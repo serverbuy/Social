@@ -3,3 +3,10 @@ node_modules/
 dist/
 .output/
 .env*
+
+# Android build output
+android-app/.gradle/
+android-app/app/build/
+android-app/build/
+android-app/local.properties
+*.apk

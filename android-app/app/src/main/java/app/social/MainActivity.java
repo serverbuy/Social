@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.webkit.CookieManager;
@@ -112,6 +113,24 @@ public class MainActivity extends Activity {
         Uri[] uris = WebChromeClient.FileChooserParams.parseResult(resultCode, data);
         fileCallback.onReceiveValue(uris);
         fileCallback = null;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            event.startTracking();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    // Long-press "Back": show the address screen again to change the server URL.
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && web != null) {
+            web.loadUrl("file:///android_asset/www/index.html#reset");
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
     }
 
     @Override
