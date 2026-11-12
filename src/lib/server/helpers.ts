@@ -207,11 +207,11 @@ export async function attachStats(
       select count(*)::int as n from friendships
       where status = 'accepted' and (user_a = ${core.userId} or user_b = ${core.userId})
     `,
-    // The former ranking servers (famous/richest/duo) are hidden, so don't count them.
+    // The former ranking/forum servers are hidden, so don't count them.
     sql<{ n: number }>`
       select count(*)::int as n from server_members m
       join servers s on s.id = m.server_id
-      where m.user_id = ${core.userId} and s.slug not in ('famous', 'richest', 'duo')
+      where m.user_id = ${core.userId} and s.slug not in ('famous', 'richest', 'duo', 'forum')
     `,
     loadClips(sql, core.userId),
   ]);

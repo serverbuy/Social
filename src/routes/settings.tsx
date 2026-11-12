@@ -13,7 +13,6 @@ import {
   LogOut,
   MessageSquare,
   Palette,
-  QrCode,
   Search,
   Server,
   Shield,
@@ -718,11 +717,8 @@ function SettingsPage() {
               </Group>
             ) : null}
 
-            {show("forum") || show("hall") || show("qr") ? (
+            {show("hall") || show("qr") ? (
               <Group title={t("more")}>
-                {show("forum") ? (
-                  <Row icon={QrCode} label="Forum" onClick={() => void navigate({ to: "/forum" })} />
-                ) : null}
                 {show("hall") ? (
                   <Row icon={BadgeCheck} label="Hall" onClick={() => void navigate({ to: "/hall" })} />
                 ) : null}

@@ -34,7 +34,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     /^\/servers\/[^/]+/.test(pathname);
   const immersivePage =
     pathname === "/settings" ||
-    pathname.startsWith("/forum") ||
     pathname === "/hall";
   const immersive = immersiveChat || immersivePage;
 

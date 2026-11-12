@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ClaimRouteImport } from './routes/claim'
-import { Route as ForumRouteImport } from './routes/forum'
 import { Route as FriendsRouteImport } from './routes/friends'
 import { Route as GroupsRouteImport } from './routes/groups'
 import { Route as HallRouteImport } from './routes/hall'
@@ -22,12 +21,10 @@ import { Route as ServersRouteImport } from './routes/servers'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ChatChannelRouteImport } from './routes/chat.$channel'
 import { Route as DmUsernameRouteImport } from './routes/dm.$username'
-import { Route as ForumBoardRouteImport } from './routes/forum.$board'
 import { Route as GroupsIdRouteImport } from './routes/groups.$id'
 import { Route as ServersIdRouteImport } from './routes/servers.$id'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ForumThreadIdRouteImport } from './routes/forum.thread.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -42,11 +39,6 @@ const ChatRoute = ChatRouteImport.update({
 const ClaimRoute = ClaimRouteImport.update({
   id: '/claim',
   path: '/claim',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForumRoute = ForumRouteImport.update({
-  id: '/forum',
-  path: '/forum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FriendsRoute = FriendsRouteImport.update({
@@ -94,11 +86,6 @@ const DmUsernameRoute = DmUsernameRouteImport.update({
   path: '/dm/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForumBoardRoute = ForumBoardRouteImport.update({
-  id: '/$board',
-  path: '/$board',
-  getParentRoute: () => ForumRoute,
-} as any)
 const GroupsIdRoute = GroupsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -119,17 +106,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForumThreadIdRoute = ForumThreadIdRouteImport.update({
-  id: '/thread/$id',
-  path: '/thread/$id',
-  getParentRoute: () => ForumRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
   '/claim': typeof ClaimRoute
-  '/forum': typeof ForumRouteWithChildren
   '/friends': typeof FriendsRoute
   '/groups': typeof GroupsRouteWithChildren
   '/hall': typeof HallRoute
@@ -139,18 +120,15 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/forum/thread/$id': typeof ForumThreadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
   '/claim': typeof ClaimRoute
-  '/forum': typeof ForumRouteWithChildren
   '/friends': typeof FriendsRoute
   '/groups': typeof GroupsRouteWithChildren
   '/hall': typeof HallRoute
@@ -160,19 +138,16 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/forum/thread/$id': typeof ForumThreadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/chat': typeof ChatRouteWithChildren
   '/claim': typeof ClaimRoute
-  '/forum': typeof ForumRouteWithChildren
   '/friends': typeof FriendsRoute
   '/groups': typeof GroupsRouteWithChildren
   '/hall': typeof HallRoute
@@ -182,12 +157,10 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/forum/thread/$id': typeof ForumThreadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -195,7 +168,6 @@ export interface FileRouteTypes {
     | '/'
     | '/chat'
     | '/claim'
-    | '/forum'
     | '/friends'
     | '/groups'
     | '/hall'
@@ -205,18 +177,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/forum/$board'
     | '/groups/$id'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
-    | '/forum/thread/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/chat'
     | '/claim'
-    | '/forum'
     | '/friends'
     | '/groups'
     | '/hall'
@@ -226,18 +195,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/forum/$board'
     | '/groups/$id'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
-    | '/forum/thread/$id'
   id:
     | '__root__'
     | '/'
     | '/chat'
     | '/claim'
-    | '/forum'
     | '/friends'
     | '/groups'
     | '/hall'
@@ -247,19 +213,16 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/forum/$board'
     | '/groups/$id'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
-    | '/forum/thread/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChatRoute: typeof ChatRouteWithChildren
   ClaimRoute: typeof ClaimRoute
-  ForumRoute: typeof ForumRouteWithChildren
   FriendsRoute: typeof FriendsRoute
   GroupsRoute: typeof GroupsRouteWithChildren
   HallRoute: typeof HallRoute
@@ -293,13 +256,6 @@ declare module '@tanstack/react-router' {
       path: '/claim'
       fullPath: '/claim'
       preLoaderRoute: typeof ClaimRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forum': {
-      id: '/forum'
-      path: '/forum'
-      fullPath: '/forum'
-      preLoaderRoute: typeof ForumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/friends': {
@@ -365,13 +321,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DmUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forum/$board': {
-      id: '/forum/$board'
-      path: '/$board'
-      fullPath: '/forum/$board'
-      preLoaderRoute: typeof ForumBoardRouteImport
-      parentRoute: typeof ForumRoute
-    }
     '/groups/$id': {
       id: '/groups/$id'
       path: '/$id'
@@ -400,13 +349,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forum/thread/$id': {
-      id: '/forum/thread/$id'
-      path: '/thread/$id'
-      fullPath: '/forum/thread/$id'
-      preLoaderRoute: typeof ForumThreadIdRouteImport
-      parentRoute: typeof ForumRoute
-    }
   }
 }
 
@@ -419,18 +361,6 @@ const ChatRouteChildren: ChatRouteChildren = {
 }
 
 const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
-
-interface ForumRouteChildren {
-  ForumBoardRoute: typeof ForumBoardRoute
-  ForumThreadIdRoute: typeof ForumThreadIdRoute
-}
-
-const ForumRouteChildren: ForumRouteChildren = {
-  ForumBoardRoute: ForumBoardRoute,
-  ForumThreadIdRoute: ForumThreadIdRoute,
-}
-
-const ForumRouteWithChildren = ForumRoute._addFileChildren(ForumRouteChildren)
 
 interface GroupsRouteChildren {
   GroupsIdRoute: typeof GroupsIdRoute
@@ -458,7 +388,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChatRoute: ChatRouteWithChildren,
   ClaimRoute: ClaimRoute,
-  ForumRoute: ForumRouteWithChildren,
   FriendsRoute: FriendsRoute,
   GroupsRoute: GroupsRouteWithChildren,
   HallRoute: HallRoute,

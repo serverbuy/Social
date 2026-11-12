@@ -37,31 +37,6 @@ export type Profile = {
   serversCount: number;
 };
 
-export type ThreadCard = {
-  id: number;
-  board: string;
-  title: string;
-  authorUsername: string;
-  authorDisplay: string;
-  authorAvatar: string;
-  authorBadge: string;
-  pinned: boolean;
-  hallOnly: boolean;
-  replies: number;
-  createdAt: string;
-};
-
-export type PostRow = {
-  id: number;
-  authorId: string;
-  authorUsername: string;
-  authorDisplay: string;
-  authorAvatar: string;
-  authorBadge: string;
-  body: string;
-  createdAt: string;
-};
-
 export type ChatRow = {
   id: number;
   channelType: string;

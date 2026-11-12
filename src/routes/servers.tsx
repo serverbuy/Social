@@ -34,8 +34,7 @@ function ServerLink({ s }: { s: ServerRow }) {
       type="button"
       className={cls}
       onClick={() => {
-        if (s.slug === "forum") void navigate({ to: "/forum" });
-        else if (s.slug === "hall") void navigate({ to: "/hall" });
+        if (s.slug === "hall") void navigate({ to: "/hall" });
         else void navigate({ to: "/servers/$id", params: { id: String(s.id) } });
       }}
     >

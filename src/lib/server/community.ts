@@ -5,21 +5,9 @@ import { optionalAuth } from "./optional-auth";
 import { iso, num } from "@/lib/utils";
 import { loadProfileById, ensureProfileMedia } from "./helpers";
 import { makeInvite } from "./live";
-import type { ChannelRow, HallItem, PostRow, ServerRow, ThreadCard } from "@/lib/types";
-
-export const BOARDS = [
-  { slug: "events", label: "Events", hall: false },
-  { slug: "szenen", label: "Szenen", hall: false },
-  { slug: "hall", label: "Hall", hall: true },
-] as const;
+import type { ChannelRow, HallItem, ServerRow } from "@/lib/types";
 
 export const DEFAULT_SERVERS = [
-  {
-    slug: "forum",
-    name: "Forum",
-    description: "Boards und Threads.",
-    channels: [["general", "text", 0]],
-  },
   {
     slug: "hall",
     name: "Hall",
@@ -31,13 +19,12 @@ export const DEFAULT_SERVERS = [
 export const DEFAULT_SLUGS = DEFAULT_SERVERS.map((s) => s.slug);
 
 /**
- * Rankings were removed from the app. Older databases still hold the former
- * ranking servers, boards and channels (seed + migration 0005), so they are
- * hidden here instead of deleted — no user data is destroyed.
+ * Rankings and the forum were removed from the app. Older databases still hold
+ * the former ranking/forum servers and ranking channels (seed + migration
+ * 0005), so they are hidden here instead of deleted — no user data is
+ * destroyed. Keep in sync with `helpers.ts` (server count).
  */
-const REMOVED_SERVER_SLUGS = ["famous", "richest", "duo"];
-const REMOVED_BOARDS = ["rankings", "nominierungen"];
-const ACTIVE_BOARDS: string[] = BOARDS.map((b) => b.slug);
+const REMOVED_SERVER_SLUGS = ["famous", "richest", "duo", "forum"];
 
 let defaultsReady: Promise<void> | null = null;
 
@@ -83,153 +70,6 @@ export function ensureDefaultServers(sql: Sql): Promise<void> {
   return defaultsReady;
 }
 
-export const listThreads = createServerFn({ method: "GET" })
-  .middleware([optionalAuth])
-  .validator((input: { board?: string } | undefined) => input ?? {})
-  .handler(async ({ context, data }) => {
-    const sql = await getSql();
-    let hall = false;
-    if (context.userId) {
-      const me = await loadProfileById(sql, context.userId);
-      hall = Boolean(me?.hallAccess);
-    }
-    const board = data.board;
-    if (board && !ACTIVE_BOARDS.includes(board)) return [] satisfies ThreadCard[];
-    const rows = board
-      ? await sql<Record<string, unknown>>`
-          select t.*, p.username, p.display_name, p.avatar_key, p.badge,
-                 (select count(*)::int from posts x where x.thread_id = t.id) as replies
-          from threads t
-          join profiles p on p.user_id = t.author_id
-          where t.board = ${board}
-          order by t.pinned desc, t.id desc
-          limit 40
-        `
-      : await sql<Record<string, unknown>>`
-          select t.*, p.username, p.display_name, p.avatar_key, p.badge,
-                 (select count(*)::int from posts x where x.thread_id = t.id) as replies
-          from threads t
-          join profiles p on p.user_id = t.author_id
-          where not (t.board = any(${REMOVED_BOARDS}))
-          order by t.pinned desc, t.id desc
-          limit 20
-        `;
-    return rows
-      .filter((r) => !r.hall_only || hall)
-      .map((r) => ({
-        id: num(r.id),
-        board: String(r.board),
-        title: String(r.title),
-        authorUsername: String(r.username),
-        authorDisplay: String(r.display_name),
-        authorAvatar: String(r.avatar_key),
-        authorBadge: String(r.badge ?? ""),
-        pinned: Boolean(r.pinned),
-        hallOnly: Boolean(r.hall_only),
-        replies: num(r.replies),
-        createdAt: iso(r.created_at),
-      })) satisfies ThreadCard[];
-  });
-
-export const getThread = createServerFn({ method: "GET" })
-  .middleware([optionalAuth])
-  .validator((input: { id: number }) => input)
-  .handler(async ({ context, data }) => {
-    const sql = await getSql();
-    const t = await sql<Record<string, unknown>>`
-      select t.*, p.username, p.display_name, p.avatar_key, p.badge
-      from threads t
-      join profiles p on p.user_id = t.author_id
-      where t.id = ${data.id}
-    `;
-    if (!t[0] || REMOVED_BOARDS.includes(String(t[0].board))) return null;
-    if (t[0].hall_only) {
-      if (!context.userId) return null;
-      const me = await loadProfileById(sql, context.userId);
-      if (!me?.hallAccess) return null;
-    }
-    const posts = await sql<Record<string, unknown>>`
-      select x.*, p.username, p.display_name, p.avatar_key, p.badge
-      from posts x
-      join profiles p on p.user_id = x.author_id
-      where x.thread_id = ${data.id}
-      order by x.id
-    `;
-    return {
-      thread: {
-        id: num(t[0].id),
-        board: String(t[0].board),
-        title: String(t[0].title),
-        authorUsername: String(t[0].username),
-        authorDisplay: String(t[0].display_name),
-        authorAvatar: String(t[0].avatar_key),
-        authorBadge: String(t[0].badge ?? ""),
-        pinned: Boolean(t[0].pinned),
-        hallOnly: Boolean(t[0].hall_only),
-        replies: posts.length,
-        createdAt: iso(t[0].created_at),
-      } satisfies ThreadCard,
-      posts: posts.map(
-        (r) =>
-          ({
-            id: num(r.id),
-            authorId: String(r.author_id),
-            authorUsername: String(r.username),
-            authorDisplay: String(r.display_name),
-            authorAvatar: String(r.avatar_key),
-            authorBadge: String(r.badge ?? ""),
-            body: String(r.body),
-            createdAt: iso(r.created_at),
-          }) satisfies PostRow,
-      ),
-    };
-  });
-
-export const createThread = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator((input: { board: string; title: string; body: string }) => input)
-  .handler(async ({ context, data }) => {
-    const sql = await getSql();
-    const me = await loadProfileById(sql, context.userId);
-    if (!me) throw new Error("Erst Username claimen.");
-    const board = BOARDS.find((b) => b.slug === data.board);
-    if (!board) return { ok: false as const, error: "Unbekanntes Board.", id: null };
-    if (board.hall && !me.hallAccess) {
-      return { ok: false as const, error: "Hall-Board ist Invite only.", id: null };
-    }
-    const title = data.title.trim().slice(0, 120);
-    const body = data.body.trim().slice(0, 2000);
-    if (title.length < 4 || body.length < 4) {
-      return { ok: false as const, error: "Titel und Text, mindestens 4 Zeichen.", id: null };
-    }
-    const inserted = await sql<{ id: number }>`
-      insert into threads (board, title, author_id, hall_only)
-      values (${board.slug}, ${title}, ${context.userId}, ${board.hall})
-      returning id
-    `;
-    const id = num(inserted[0]?.id);
-    await sql`
-      insert into posts (thread_id, author_id, body) values (${id}, ${context.userId}, ${body})
-    `;
-    return { ok: true as const, error: null, id };
-  });
-
-export const replyThread = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator((input: { threadId: number; body: string }) => input)
-  .handler(async ({ context, data }) => {
-    const sql = await getSql();
-    const me = await loadProfileById(sql, context.userId);
-    if (!me) throw new Error("Erst Username claimen.");
-    const body = data.body.trim().slice(0, 2000);
-    if (body.length < 1) return { ok: false as const };
-    await sql`
-      insert into posts (thread_id, author_id, body)
-      values (${data.threadId}, ${context.userId}, ${body})
-    `;
-    return { ok: true as const };
-  });
-
 export const listServers = createServerFn({ method: "GET" })
   .middleware([optionalAuth])
   .handler(async ({ context }) => {
@@ -248,8 +88,7 @@ export const listServers = createServerFn({ method: "GET" })
           or s.owner_id = ${context.userId ?? "__none__"})
       order by
         case s.slug
-          when 'forum' then 0
-          when 'hall' then 1
+          when 'hall' then 0
           else 10
         end,
         s.id

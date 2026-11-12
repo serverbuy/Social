@@ -221,8 +221,7 @@ function Home() {
                 type="button"
                 className="h-10 shrink-0 rounded-full bg-surface px-4 text-sm font-medium"
                 onClick={() => {
-                  if (s.slug === "forum") void navigate({ to: "/forum" });
-                  else if (s.slug === "hall") void navigate({ to: "/hall" });
+                  if (s.slug === "hall") void navigate({ to: "/hall" });
                   else void navigate({ to: "/servers/$id", params: { id: String(s.id) } });
                 }}
               >
