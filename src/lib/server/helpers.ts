@@ -164,7 +164,7 @@ export async function loadClips(sql: Sql, userId: string): Promise<ProfileClip[]
 
 export function mapProfileCore(row: Record<string, unknown>): Omit<
   Profile,
-  "friendsCount" | "serversCount" | "famousRank" | "richestRank" | "duoRank" | "clips"
+  "friendsCount" | "serversCount" | "clips"
 > {
   return {
     userId: String(row.user_id),
@@ -198,63 +198,20 @@ export function mapProfileCore(row: Record<string, unknown>): Omit<
   };
 }
 
-export async function attachRanks(
+export async function attachStats(
   sql: Sql,
   core: ReturnType<typeof mapProfileCore>,
 ): Promise<Profile> {
-  const { cur } = await periodPair(sql);
-  const [friends, servers, famous, richest, duo, clips] = await Promise.all([
+  const [friends, servers, clips] = await Promise.all([
     sql<{ n: number }>`
       select count(*)::int as n from friendships
       where status = 'accepted' and (user_a = ${core.userId} or user_b = ${core.userId})
     `,
+    // The former ranking servers (famous/richest/duo) are hidden, so don't count them.
     sql<{ n: number }>`
-      select count(*)::int as n from server_members where user_id = ${core.userId}
-    `,
-    sql<{ rank: number }>`
-      with scores as (
-        select p.user_id,
-          rank() over (order by coalesce(v.cnt, 0) desc, p.username) as rank
-        from profiles p
-        left join (
-          select target_id, count(*)::int as cnt from votes
-          where world = 'famous' and period = ${cur}
-          group by target_id
-        ) v on v.target_id = p.user_id
-      )
-      select rank from scores where user_id = ${core.userId}
-    `,
-    sql<{ rank: number }>`
-      with scores as (
-        select p.user_id,
-          rank() over (order by coalesce(d.total, 0) desc, p.username) as rank
-        from profiles p
-        left join (
-          select recipient_id, sum(amount_cents)::int as total
-          from donations where verified = true
-          group by recipient_id
-        ) d on d.recipient_id = p.user_id
-      )
-      select rank from scores where user_id = ${core.userId}
-    `,
-    sql<{ rank: number }>`
-      with scores as (
-        select d.id,
-          rank() over (order by coalesce(v.cnt, 0) desc, d.id) as rank
-        from duos d
-        left join (
-          select target_id, count(*)::int as cnt from votes
-          where world = 'duo' and period = ${cur}
-          group by target_id
-        ) v on v.target_id = d.id::text
-      )
-      select rank from scores
-      where id in (
-        select id from duos
-        where status = 'approved' and (user_a = ${core.userId} or user_b = ${core.userId})
-        order by id
-        limit 1
-      )
+      select count(*)::int as n from server_members m
+      join servers s on s.id = m.server_id
+      where m.user_id = ${core.userId} and s.slug not in ('famous', 'richest', 'duo')
     `,
     loadClips(sql, core.userId),
   ]);
@@ -263,9 +220,6 @@ export async function attachRanks(
     clips,
     friendsCount: num(friends[0]?.n),
     serversCount: num(servers[0]?.n),
-    famousRank: famous[0] ? num(famous[0].rank) : null,
-    richestRank: richest[0] ? num(richest[0].rank) : null,
-    duoRank: duo[0] ? num(duo[0].rank) : null,
   };
 }
 
@@ -274,7 +228,7 @@ export async function loadProfileById(sql: Sql, userId: string): Promise<Profile
     select * from profiles where user_id = ${userId} limit 1
   `;
   if (!rows[0]) return null;
-  return attachRanks(sql, mapProfileCore(rows[0]));
+  return attachStats(sql, mapProfileCore(rows[0]));
 }
 
 export async function loadProfileByUsername(sql: Sql, username: string): Promise<Profile | null> {
@@ -282,7 +236,7 @@ export async function loadProfileByUsername(sql: Sql, username: string): Promise
     select * from profiles where username = ${username} limit 1
   `;
   if (!rows[0]) return null;
-  return attachRanks(sql, mapProfileCore(rows[0]));
+  return attachStats(sql, mapProfileCore(rows[0]));
 }
 
 export async function pushEvent(

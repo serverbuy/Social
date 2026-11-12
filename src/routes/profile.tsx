@@ -21,11 +21,10 @@ import {
   updateProfile,
   updateSong,
 } from "@/lib/server/profiles";
-import { listNominations, moderateNomination } from "@/lib/server/rankings";
 import { compressArt, compressAvatar, compressBanner } from "@/lib/avatar";
 import { CLIP_MAX, fileTitle, readAsDataUrl, SONG_MAX } from "@/lib/media";
 import { updateStatus } from "@/lib/server/live";
-import type { NominationRow, Privacy } from "@/lib/types";
+import type { Privacy } from "@/lib/types";
 
 export const Route = createFileRoute("/profile")({ component: OwnProfile });
 
@@ -38,7 +37,6 @@ function OwnProfile() {
   const [statusText, setStatusText] = useState("");
   const [privacy, setPrivacy] = useState<Privacy>("public");
   const [activityPublic, setActivityPublic] = useState(true);
-  const [noms, setNoms] = useState<NominationRow[]>([]);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -57,7 +55,6 @@ function OwnProfile() {
     setStatusText(profile.statusText);
     setPrivacy(profile.privacy);
     setActivityPublic(profile.activityPublic);
-    if (profile.isMod) void listNominations().then(setNoms);
   }, [profile]);
 
   if (!profile) {
@@ -319,49 +316,6 @@ function OwnProfile() {
               </Link>
             </p>
 
-            {profile.isMod ? (
-              <section className="mt-12">
-                <h2 className="text-xl font-bold">Nominierungen</h2>
-                {noms.length === 0 ? (
-                  <p className="mt-3 text-sm text-muted">Inbox leer.</p>
-                ) : (
-                  <ul className="mt-4 space-y-1">
-                    {noms.map((n) => (
-                      <li key={n.id} className="flex flex-wrap items-center gap-3 rounded-lg bg-surface px-4 py-3 text-sm">
-                        <span className="text-subtle">{n.world}</span>
-                        <span className="flex-1">
-                          @{n.targetUsername}
-                          {n.secondUsername ? ` × @${n.secondUsername}` : ""}
-                        </span>
-                        {n.status === "pending" ? (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={async () => {
-                                await moderateNomination({ data: { id: n.id, status: "approved" } });
-                                setNoms(await listNominations());
-                              }}
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={async () => {
-                                await moderateNomination({ data: { id: n.id, status: "rejected" } });
-                                setNoms(await listNominations());
-                              }}
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-            ) : null}
           </div>
         </>
       }

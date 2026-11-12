@@ -22,10 +22,8 @@ import { Route as ServersRouteImport } from './routes/servers'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ChatChannelRouteImport } from './routes/chat.$channel'
 import { Route as DmUsernameRouteImport } from './routes/dm.$username'
-import { Route as DuoIdRouteImport } from './routes/duo.$id'
 import { Route as ForumBoardRouteImport } from './routes/forum.$board'
 import { Route as GroupsIdRouteImport } from './routes/groups.$id'
-import { Route as RankingsWorldRouteImport } from './routes/rankings.$world'
 import { Route as ServersIdRouteImport } from './routes/servers.$id'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -96,11 +94,6 @@ const DmUsernameRoute = DmUsernameRouteImport.update({
   path: '/dm/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DuoIdRoute = DuoIdRouteImport.update({
-  id: '/duo/$id',
-  path: '/duo/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForumBoardRoute = ForumBoardRouteImport.update({
   id: '/$board',
   path: '/$board',
@@ -110,11 +103,6 @@ const GroupsIdRoute = GroupsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => GroupsRoute,
-} as any)
-const RankingsWorldRoute = RankingsWorldRouteImport.update({
-  id: '/rankings/$world',
-  path: '/rankings/$world',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const ServersIdRoute = ServersIdRouteImport.update({
   id: '/$id',
@@ -151,10 +139,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/duo/$id': typeof DuoIdRoute
   '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
-  '/rankings/$world': typeof RankingsWorldRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -174,10 +160,8 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/duo/$id': typeof DuoIdRoute
   '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
-  '/rankings/$world': typeof RankingsWorldRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -198,10 +182,8 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
-  '/duo/$id': typeof DuoIdRoute
   '/forum/$board': typeof ForumBoardRoute
   '/groups/$id': typeof GroupsIdRoute
-  '/rankings/$world': typeof RankingsWorldRoute
   '/servers/$id': typeof ServersIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -223,10 +205,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/duo/$id'
     | '/forum/$board'
     | '/groups/$id'
-    | '/rankings/$world'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
@@ -246,10 +226,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/duo/$id'
     | '/forum/$board'
     | '/groups/$id'
-    | '/rankings/$world'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
@@ -269,10 +247,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/chat/$channel'
     | '/dm/$username'
-    | '/duo/$id'
     | '/forum/$board'
     | '/groups/$id'
-    | '/rankings/$world'
     | '/servers/$id'
     | '/u/$username'
     | '/api/auth/$'
@@ -292,8 +268,6 @@ export interface RootRouteChildren {
   ServersRoute: typeof ServersRouteWithChildren
   SettingsRoute: typeof SettingsRoute
   DmUsernameRoute: typeof DmUsernameRoute
-  DuoIdRoute: typeof DuoIdRoute
-  RankingsWorldRoute: typeof RankingsWorldRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -391,13 +365,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DmUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/duo/$id': {
-      id: '/duo/$id'
-      path: '/duo/$id'
-      fullPath: '/duo/$id'
-      preLoaderRoute: typeof DuoIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forum/$board': {
       id: '/forum/$board'
       path: '/$board'
@@ -411,13 +378,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/groups/$id'
       preLoaderRoute: typeof GroupsIdRouteImport
       parentRoute: typeof GroupsRoute
-    }
-    '/rankings/$world': {
-      id: '/rankings/$world'
-      path: '/rankings/$world'
-      fullPath: '/rankings/$world'
-      preLoaderRoute: typeof RankingsWorldRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/servers/$id': {
       id: '/servers/$id'
@@ -507,8 +467,6 @@ const rootRouteChildren: RootRouteChildren = {
   ServersRoute: ServersRouteWithChildren,
   SettingsRoute: SettingsRoute,
   DmUsernameRoute: DmUsernameRoute,
-  DuoIdRoute: DuoIdRoute,
-  RankingsWorldRoute: RankingsWorldRoute,
   UUsernameRoute: UUsernameRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }

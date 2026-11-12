@@ -34,10 +34,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     /^\/servers\/[^/]+/.test(pathname);
   const immersivePage =
     pathname === "/settings" ||
-    pathname.startsWith("/rankings/") ||
     pathname.startsWith("/forum") ||
-    pathname === "/hall" ||
-    pathname.startsWith("/duo/");
+    pathname === "/hall";
   const immersive = immersiveChat || immersivePage;
 
   if (!ready) return <BootScreen label="…" />;

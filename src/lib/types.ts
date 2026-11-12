@@ -35,48 +35,6 @@ export type Profile = {
   lastSeen: string;
   friendsCount: number;
   serversCount: number;
-  famousRank: number | null;
-  richestRank: number | null;
-  duoRank: number | null;
-};
-
-export type RankRow = {
-  userId: string;
-  username: string;
-  displayName: string;
-  bio: string;
-  avatarKey: string;
-  sceneTags: string[];
-  verified: boolean;
-  badge: string;
-  rank: number;
-  score: number;
-  prevScore: number;
-  trend: number;
-  lastDonationCents: number | null;
-  lastDonationAt: string | null;
-  topDonorUsername: string | null;
-  lastOvertake: string | null;
-};
-
-export type DuoRow = {
-  id: number;
-  name: string;
-  bio: string;
-  a: Pick<Profile, "userId" | "username" | "displayName" | "avatarKey" | "verified">;
-  b: Pick<Profile, "userId" | "username" | "displayName" | "avatarKey" | "verified">;
-  rank: number;
-  score: number;
-  prevScore: number;
-  trend: number;
-};
-
-export type LiveEvent = {
-  id: number;
-  kind: string;
-  body: string;
-  href: string;
-  createdAt: string;
 };
 
 export type ThreadCard = {
@@ -188,16 +146,6 @@ export type ConnectionRow = {
   avatarKey: string;
   status: string;
   outgoing: boolean;
-};
-
-export type NominationRow = {
-  id: number;
-  world: string;
-  targetUsername: string;
-  secondUsername: string | null;
-  nominatorUsername: string;
-  status: string;
-  createdAt: string;
 };
 
 export type MeState = {

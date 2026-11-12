@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Gamepad2, MoreHorizontal, Music, Pause, Play, Trash2, Users } from "lucide-react";
 import { isPhotoAvatar } from "@/lib/avatar";
-import { rankLabel } from "@/lib/utils";
 import { labelFromLink, widgetOn } from "@/lib/widgets";
 import { useI18n } from "@/components/layout/i18n-context";
 import type { Profile } from "@/lib/types";
@@ -202,23 +201,6 @@ export function GameWidget({
   );
 }
 
-export function RanksWidget({ profile }: { profile: Pick<Profile, "famousRank" | "richestRank" | "duoRank"> }) {
-  return (
-    <div className="grid grid-cols-3 gap-2">
-      {[
-        ["Famous", profile.famousRank],
-        ["Richest", profile.richestRank],
-        ["Duo", profile.duoRank],
-      ].map(([label, rank]) => (
-        <div key={String(label)} className="rounded-2xl bg-surface px-2.5 py-2.5 text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-subtle">{label}</p>
-          <p className="mt-0.5 text-base font-bold">{rank ? rankLabel(Number(rank)) : "—"}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function FriendsWidget({ count }: { count: number }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-surface px-3 py-2.5">
@@ -269,10 +251,9 @@ export function ProfileWidgets({
   const w = profile.widgets;
   const showMusic = widgetOn(w, "music");
   const showGame = widgetOn(w, "game");
-  const showRanks = widgetOn(w, "ranks");
   const showFriends = widgetOn(w, "friends");
   const showSince = widgetOn(w, "since");
-  if (!showMusic && !showGame && !showRanks && !showFriends && !showSince) return null;
+  if (!showMusic && !showGame && !showFriends && !showSince) return null;
   return (
     <div className="mt-5 space-y-3">
       {showMusic ? (
@@ -291,7 +272,6 @@ export function ProfileWidgets({
         />
       ) : null}
       {showGame ? <GameWidget game={profile.gameName} editable={editable} onSave={onGame} /> : null}
-      {showRanks ? <RanksWidget profile={profile} /> : null}
       {showFriends ? <FriendsWidget count={profile.friendsCount} /> : null}
       {showSince ? <SinceWidget createdAt={profile.createdAt} /> : null}
     </div>

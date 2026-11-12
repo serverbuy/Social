@@ -473,7 +473,6 @@ function SettingsPage() {
       const labels: Record<WidgetId, string> = {
         music: t("widgetMusic"),
         game: t("widgetGame"),
-        ranks: t("widgetRanks"),
         friends: t("widgetFriends"),
         since: t("widgetSince"),
       };

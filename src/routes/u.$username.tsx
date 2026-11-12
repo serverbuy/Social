@@ -7,7 +7,6 @@ import { useMe } from "@/components/layout/me-context";
 import { AvatarMark } from "@/components/mark/avatar-mark";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
-import { DonateDialog } from "@/components/rankings/donate-dialog";
 import { ProfileWidgets } from "@/components/profile/widgets";
 import { ClipGrid } from "@/components/profile/clip-grid";
 import { ProfileScreen } from "@/components/profile/profile-screen";
@@ -15,9 +14,7 @@ import { ProfileHero } from "@/components/profile/profile-hero";
 import { getProfile, requestConnection } from "@/lib/server/profiles";
 import { addFriend } from "@/lib/server/social";
 import { blockUser } from "@/lib/server/live";
-import { donate, getDonationHistory, vote } from "@/lib/server/rankings";
 import { fileReport } from "@/lib/server/community";
-import { formatEuro } from "@/lib/utils";
 import type { ConnectionRow, Profile } from "@/lib/types";
 
 export const Route = createFileRoute("/u/$username")({ component: ProfilePage });
@@ -29,11 +26,6 @@ function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [visible, setVisible] = useState(true);
   const [connections, setConnections] = useState<ConnectionRow[]>([]);
-  const [history, setHistory] = useState<{ donor: string; amountCents: number; createdAt: string }[]>(
-    [],
-  );
-  const [donateOpen, setDonateOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     void (async () => {
@@ -41,9 +33,6 @@ function ProfilePage() {
       setProfile(res.profile);
       setVisible(res.visible);
       setConnections(res.connections);
-      if (res.profile) {
-        setHistory(await getDonationHistory({ data: { username: res.profile.username } }));
-      }
     })();
   }, [username]);
 
@@ -98,21 +87,6 @@ function ProfilePage() {
                   >
                     Connect
                   </Button>
-                  <Button variant="outline" onClick={() => setDonateOpen(true)}>
-                    Donate
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={async () => {
-                      const res = await vote({
-                        data: { world: "famous", targetId: profile.userId },
-                      });
-                      if (!res.ok) toast.error(res.error ?? "");
-                      else toast.success("Stimme gesetzt.");
-                    }}
-                  >
-                    Vote Famous
-                  </Button>
                   <Button
                     variant="outline"
                     onClick={() =>
@@ -137,7 +111,7 @@ function ProfilePage() {
                 <>
                   {profile.bio ? <p className="mt-6 max-w-xl text-sm text-muted">{profile.bio}</p> : null}
                   <ProfileWidgets profile={profile} />
-                  <div className="mt-8 grid gap-8 lg:grid-cols-2">
+                  <div className="mt-8">
                     <section>
                       <h2 className="text-xl font-bold">Connections</h2>
                       {connections.length === 0 ? (
@@ -154,21 +128,6 @@ function ProfilePage() {
                                 <AvatarMark username={c.username} avatarKey={c.avatarKey} size={28} />
                                 @{c.username}
                               </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </section>
-                    <section>
-                      <h2 className="text-xl font-bold">Donations</h2>
-                      {history.length === 0 ? (
-                        <EmptyState className="mt-4" title="Keine Payments" />
-                      ) : (
-                        <ul className="mt-4 space-y-1">
-                          {history.map((h, i) => (
-                            <li key={i} className="flex justify-between rounded-xl px-3 py-2 text-sm">
-                              <span>@{h.donor}</span>
-                              <span>{formatEuro(h.amountCents)}</span>
                             </li>
                           ))}
                         </ul>
@@ -204,28 +163,6 @@ function ProfilePage() {
           clips={<ClipGrid clips={profile.clips ?? []} />}
         />
 
-      {donateOpen ? (
-        <DonateDialog
-          username={profile.username}
-          busy={busy}
-          onClose={() => setDonateOpen(false)}
-          onSubmit={async (amount) => {
-            setBusy(true);
-            try {
-              const res = await donate({
-                data: { username: profile.username, amountEuros: amount },
-              });
-              if (!res.ok) toast.error(res.error ?? "");
-              else if (res.overtake)
-                toast.success(`Overbid. @${profile.username} hat @${res.overtake} überholt.`);
-              else toast.success("Payment verifiziert.");
-              setDonateOpen(false);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        />
-      ) : null}
     </>
   );
 }

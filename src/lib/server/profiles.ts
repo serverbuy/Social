@@ -65,7 +65,15 @@ export const getProfile = createServerFn({ method: "GET" })
         and c.status = 'accepted'
       limit 12
     `;
-    const connections: ConnectionRow[] = cons.map((r) => ({
+    // A connection can exist in both directions (A->B and B->A); show each person once.
+    const seen = new Set<string>();
+    const unique = cons.filter((r) => {
+      const id = String(r.user_id);
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+    const connections: ConnectionRow[] = unique.map((r) => ({
       userId: String(r.user_id),
       username: String(r.username),
       displayName: String(r.display_name),

@@ -1,4 +1,4 @@
-export const WIDGET_IDS = ["music", "game", "ranks", "friends", "since"] as const;
+export const WIDGET_IDS = ["music", "game", "friends", "since"] as const;
 export type WidgetId = (typeof WIDGET_IDS)[number];
 
 export function parseWidgets(raw?: string | null): WidgetId[] {

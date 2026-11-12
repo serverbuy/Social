@@ -8,41 +8,12 @@ import { makeInvite } from "./live";
 import type { ChannelRow, HallItem, PostRow, ServerRow, ThreadCard } from "@/lib/types";
 
 export const BOARDS = [
-  { slug: "rankings", label: "Rankings", hall: false },
   { slug: "events", label: "Events", hall: false },
-  { slug: "nominierungen", label: "Nominierungen", hall: false },
   { slug: "szenen", label: "Szenen", hall: false },
   { slug: "hall", label: "Hall", hall: true },
 ] as const;
 
 export const DEFAULT_SERVERS = [
-  {
-    slug: "famous",
-    name: "Famous",
-    description: "Most Famous. Vote und Chat.",
-    channels: [
-      ["general", "text", 0],
-      ["board", "ranking", 1],
-    ],
-  },
-  {
-    slug: "richest",
-    name: "Richest",
-    description: "Richest. Donate und Chat.",
-    channels: [
-      ["general", "text", 0],
-      ["board", "ranking", 1],
-    ],
-  },
-  {
-    slug: "duo",
-    name: "Duo",
-    description: "Duos. Vote und Chat.",
-    channels: [
-      ["general", "text", 0],
-      ["board", "ranking", 1],
-    ],
-  },
   {
     slug: "forum",
     name: "Forum",
@@ -58,6 +29,15 @@ export const DEFAULT_SERVERS = [
 ] as const;
 
 export const DEFAULT_SLUGS = DEFAULT_SERVERS.map((s) => s.slug);
+
+/**
+ * Rankings were removed from the app. Older databases still hold the former
+ * ranking servers, boards and channels (seed + migration 0005), so they are
+ * hidden here instead of deleted — no user data is destroyed.
+ */
+const REMOVED_SERVER_SLUGS = ["famous", "richest", "duo"];
+const REMOVED_BOARDS = ["rankings", "nominierungen"];
+const ACTIVE_BOARDS: string[] = BOARDS.map((b) => b.slug);
 
 let defaultsReady: Promise<void> | null = null;
 
@@ -114,6 +94,7 @@ export const listThreads = createServerFn({ method: "GET" })
       hall = Boolean(me?.hallAccess);
     }
     const board = data.board;
+    if (board && !ACTIVE_BOARDS.includes(board)) return [] satisfies ThreadCard[];
     const rows = board
       ? await sql<Record<string, unknown>>`
           select t.*, p.username, p.display_name, p.avatar_key, p.badge,
@@ -129,6 +110,7 @@ export const listThreads = createServerFn({ method: "GET" })
                  (select count(*)::int from posts x where x.thread_id = t.id) as replies
           from threads t
           join profiles p on p.user_id = t.author_id
+          where not (t.board = any(${REMOVED_BOARDS}))
           order by t.pinned desc, t.id desc
           limit 20
         `;
@@ -160,7 +142,7 @@ export const getThread = createServerFn({ method: "GET" })
       join profiles p on p.user_id = t.author_id
       where t.id = ${data.id}
     `;
-    if (!t[0]) return null;
+    if (!t[0] || REMOVED_BOARDS.includes(String(t[0].board))) return null;
     if (t[0].hall_only) {
       if (!context.userId) return null;
       const me = await loadProfileById(sql, context.userId);
@@ -260,16 +242,14 @@ export const listServers = createServerFn({ method: "GET" })
       from servers s
       left join server_members sm
         on sm.server_id = s.id and sm.user_id = ${context.userId ?? "__none__"}
-      where s.visibility = 'public'
-         or sm.user_id is not null
-         or s.owner_id = ${context.userId ?? "__none__"}
+      where not (s.slug = any(${REMOVED_SERVER_SLUGS}))
+        and (s.visibility = 'public'
+          or sm.user_id is not null
+          or s.owner_id = ${context.userId ?? "__none__"})
       order by
         case s.slug
-          when 'famous' then 0
-          when 'richest' then 1
-          when 'duo' then 2
-          when 'forum' then 3
-          when 'hall' then 4
+          when 'forum' then 0
+          when 'hall' then 1
           else 10
         end,
         s.id
@@ -308,7 +288,7 @@ export const getServer = createServerFn({ method: "GET" })
         on sm.server_id = s.id and sm.user_id = ${context.userId ?? "__none__"}
       where s.id = ${data.id}
     `;
-    if (!s[0]) return null;
+    if (!s[0] || REMOVED_SERVER_SLUGS.includes(String(s[0].slug))) return null;
     const vis = String(s[0].visibility);
     const isOwner = Boolean(context.userId) && String(s[0].owner_id) === context.userId;
     let joined = Boolean(s[0].my_role) || isOwner;
@@ -323,7 +303,7 @@ export const getServer = createServerFn({ method: "GET" })
     if (vis !== "public" && !joined) return { locked: true as const, server: null, channels: [] };
     const channels = await sql<Record<string, unknown>>`
       select id, name, kind, position from server_channels
-      where server_id = ${data.id}
+      where server_id = ${data.id} and kind <> 'ranking'
       order by position, id
     `;
     return {
@@ -419,7 +399,6 @@ export const createServer = createServerFn({ method: "POST" })
     `;
     const channels = [
       ["general", "text", 0],
-      ["rankings", "ranking", 1],
       ["media", "media", 2],
       ["announce", "announcements", 3],
       ["voice", "voice", 4],
