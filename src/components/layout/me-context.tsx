@@ -36,10 +36,15 @@ export function MeProvider({ children }: { children: ReactNode }) {
   const { user, isPending } = useCurrentUserState();
   const { setTheme } = useTheme();
   const { setLang } = useI18n();
-  const [state, setState] = useState<MeState & { ready: boolean }>({
+  // `loadedFor` = the session user id this state was loaded for. Until it
+  // matches the current session, we are not ready — otherwise right after
+  // sign-up/sign-in the shell sees a stale `signedIn: false` and bounces
+  // between / and /login forever.
+  const [state, setState] = useState<MeState & { ready: boolean; loadedFor: string | null }>({
     ready: false,
     signedIn: false,
     profile: null,
+    loadedFor: null,
   });
   const [unread, setUnread] = useState(0);
   const hydrated = useRef<string | null>(null);
@@ -48,26 +53,35 @@ export function MeProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const me = await getMe();
-      setState({ ready: true, ...me });
+      setState((s) => ({ ...s, ready: true, ...me }));
       if (me.profile && hydrated.current !== me.profile.userId) {
         hydrated.current = me.profile.userId;
         if (isThemeId(me.profile.themeId)) setTheme(me.profile.themeId);
         if (me.profile.lang === "de" || me.profile.lang === "en") setLang(me.profile.lang);
       }
     } catch {
-      setState({ ready: true, signedIn: false, profile: null });
+      setState((s) => ({ ...s, ready: true, signedIn: false, profile: null }));
     }
   }, [setLang, setTheme]);
 
+  // Key on the id, not the object: useCurrentUserState() builds a fresh `user`
+  // object every render, so depending on it re-ran getMe() in an endless loop.
+  const userId = user?.id ?? null;
   useEffect(() => {
     if (isPending) return;
-    if (!user) {
-      setState({ ready: true, signedIn: false, profile: null });
+    if (!userId) {
+      setState({ ready: true, signedIn: false, profile: null, loadedFor: null });
       hydrated.current = null;
       return;
     }
-    void refresh();
-  }, [user, isPending, refresh]);
+    let cancelled = false;
+    void refresh().finally(() => {
+      if (!cancelled) setState((s) => ({ ...s, loadedFor: userId }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, isPending, refresh]);
 
   useEffect(() => {
     if (!state.signedIn || !state.profile) return;
@@ -99,7 +113,7 @@ export function MeProvider({ children }: { children: ReactNode }) {
   return (
     <MeContext.Provider
       value={{
-        ready: state.ready && !isPending,
+        ready: state.ready && !isPending && (!userId || state.loadedFor === userId),
         signedIn: state.signedIn,
         profile: state.profile,
         unread,
