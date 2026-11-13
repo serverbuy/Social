@@ -12,11 +12,18 @@ import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
+    /** Die komplette App liegt im APK (assets/www) und wird über diese Fantasie-Adresse ausgeliefert. */
+    private static final String LOCAL_HOST = "social.local";
+    private static final String LOCAL_URL = "https://" + LOCAL_HOST + "/";
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_CHOOSER = 1001;
@@ -55,10 +62,18 @@ public class MainActivity extends Activity {
 
         web.setWebViewClient(new WebViewClient() {
             @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                Uri uri = request.getUrl();
+                if (!LOCAL_HOST.equals(uri.getHost())) return null;
+                return serveAsset(uri.getPath());
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri uri = request.getUrl();
                 String host = uri.getHost() == null ? "" : uri.getHost();
                 String url = uri.toString();
+                if (LOCAL_HOST.equals(host)) return false;
                 if (host.contains("accounts.google.com")
                         || host.contains("google.com") && url.contains("oauth")
                         || host.contains("api.twitter.com")
@@ -101,9 +116,53 @@ public class MainActivity extends Activity {
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState);
         } else {
-            web.loadUrl("file:///android_asset/www/index.html");
+            web.loadUrl(startUrl());
         }
         setContentView(web);
+    }
+
+    /** Offline (Standard): eingebaute App. Optional: assets/live_url.txt mit einer echten Web-Adresse. */
+    private String startUrl() {
+        try (InputStream in = getAssets().open("live_url.txt")) {
+            byte[] b = new byte[2048];
+            int n = in.read(b);
+            String url = n > 0 ? new String(b, 0, n, "UTF-8").trim() : "";
+            if (url.startsWith("http")) return url;
+        } catch (Exception ignored) { }
+        return LOCAL_URL;
+    }
+
+    private static final Map<String, String> MIME = new HashMap<>();
+    static {
+        MIME.put("html", "text/html"); MIME.put("js", "text/javascript"); MIME.put("mjs", "text/javascript");
+        MIME.put("css", "text/css"); MIME.put("json", "application/json"); MIME.put("wasm", "application/wasm");
+        MIME.put("svg", "image/svg+xml"); MIME.put("png", "image/png"); MIME.put("jpg", "image/jpeg");
+        MIME.put("jpeg", "image/jpeg"); MIME.put("webp", "image/webp"); MIME.put("gif", "image/gif");
+        MIME.put("ico", "image/x-icon"); MIME.put("woff2", "font/woff2"); MIME.put("woff", "font/woff");
+        MIME.put("ttf", "font/ttf"); MIME.put("data", "application/octet-stream"); MIME.put("txt", "text/plain");
+        MIME.put("webmanifest", "application/manifest+json"); MIME.put("mp3", "audio/mpeg"); MIME.put("mp4", "video/mp4");
+    }
+
+    /** Liefert Dateien aus assets/www; unbekannte Pfade (App-Seiten wie /chat) bekommen index.html. */
+    private WebResourceResponse serveAsset(String path) {
+        if (path == null || path.isEmpty() || path.endsWith("/")) path = "/index.html";
+        String file = "www" + path;
+        InputStream in;
+        try {
+            in = getAssets().open(file);
+        } catch (Exception e) {
+            file = "www/index.html";
+            try { in = getAssets().open(file); } catch (Exception e2) { return null; }
+        }
+        String ext = file.contains(".") ? file.substring(file.lastIndexOf('.') + 1).toLowerCase() : "";
+        String mime = MIME.containsKey(ext) ? MIME.get(ext) : "application/octet-stream";
+        String enc = mime.startsWith("text/") || mime.endsWith("javascript") || mime.endsWith("json") ? "UTF-8" : null;
+        WebResourceResponse res = new WebResourceResponse(mime, enc, in);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Cache-Control", "no-cache");
+        res.setResponseHeaders(headers);
+        return res;
     }
 
     @Override
@@ -123,11 +182,11 @@ public class MainActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    // Long-press "Back": show the address screen again to change the server URL.
+    // Lange auf "Zurück" drücken: zur Startseite der App.
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && web != null) {
-            web.loadUrl("file:///android_asset/www/index.html#reset");
+            web.loadUrl(LOCAL_URL);
             return true;
         }
         return super.onKeyLongPress(keyCode, event);

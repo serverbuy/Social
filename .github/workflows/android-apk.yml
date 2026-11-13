@@ -3,9 +3,6 @@ name: Android APK
 on:
   push:
     branches: [main]
-    paths:
-      - "android-app/**"
-      - ".github/workflows/android-apk.yml"
   workflow_dispatch:
 
 permissions:
@@ -17,6 +14,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      # Komplette App inkl. Datenbank für den Offline-Betrieb im Handy bauen
+      - name: Offline-Web-App bauen
+        run: |
+          npm ci --no-audit --no-fund --ignore-scripts
+          npx vite build -c vite.offline.config.ts
+          rm -rf android-app/app/src/main/assets/www
+          mkdir -p android-app/app/src/main/assets
+          cp -r dist-offline android-app/app/src/main/assets/www
+
+      # Optional: Repository-Variable APP_URL setzen → App öffnet stattdessen deine Online-Version
+      - name: Live-URL (optional)
+        if: ${{ vars.APP_URL != '' }}
+        run: echo "${{ vars.APP_URL }}" > android-app/app/src/main/assets/live_url.txt
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -25,16 +41,6 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
-
-      # Optional: set a repository variable APP_URL (Settings → Secrets and
-      # variables → Actions → Variables) so the app opens your site directly.
-      - name: Inject live URL
-        if: ${{ vars.APP_URL != '' }}
-        env:
-          APP_URL: ${{ vars.APP_URL }}
-        run: |
-          sed -i "s|var LIVE = \"\";|var LIVE = \"${APP_URL}\";|" android-app/app/src/main/assets/www/index.html
-          grep -n "var LIVE" android-app/app/src/main/assets/www/index.html
 
       - name: Build APK
         working-directory: android-app
@@ -54,6 +60,6 @@ jobs:
         run: |
           gh release delete latest --yes --cleanup-tag || true
           gh release create latest social.apk \
-            --title "@social Android-App" \
-            --notes "Automatisch gebaut aus ${GITHUB_SHA::7}. APK herunterladen und auf dem Handy installieren." \
+            --title "@social Android-App (Offline)" \
+            --notes "Komplette App inkl. Datenbank im Handy – kein Server nötig. Gebaut aus ${GITHUB_SHA::7}." \
             --latest
