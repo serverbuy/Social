@@ -1,6 +1,15 @@
 package app.social;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.graphics.drawable.GradientDrawable;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -25,6 +34,9 @@ public class MainActivity extends Activity {
     private static final String LOCAL_HOST = "social.local";
     private static final String LOCAL_URL = "https://" + LOCAL_HOST + "/";
     private WebView web;
+    private SharedPreferences prefs;
+    private boolean desktop;
+    private TextView modeButton;
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_CHOOSER = 1001;
 
@@ -35,6 +47,10 @@ public class MainActivity extends Activity {
         w.setStatusBarColor(Color.parseColor("#313338"));
         w.setNavigationBarColor(Color.parseColor("#1e1f22"));
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+        prefs = getSharedPreferences("social_app", MODE_PRIVATE);
+        desktop = prefs.getBoolean("desktop", false);
+        applyOrientation();
 
         web = new WebView(this);
         web.setBackgroundColor(Color.parseColor("#313338"));
@@ -66,6 +82,12 @@ public class MainActivity extends Activity {
                 Uri uri = request.getUrl();
                 if (!LOCAL_HOST.equals(uri.getHost())) return null;
                 return serveAsset(uri.getPath());
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                applyViewport();
             }
 
             @Override
@@ -118,7 +140,100 @@ public class MainActivity extends Activity {
         } else {
             web.loadUrl(startUrl());
         }
-        setContentView(web);
+        FrameLayout root = new FrameLayout(this);
+        root.addView(web, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        modeButton = buildModeButton();
+        int size = dp(42);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.END | Gravity.TOP);
+        lp.setMargins(0, 0, dp(6), 0);
+        root.addView(modeButton, lp);
+        root.post(() -> modeButton.setTranslationY(prefs.getFloat("btn_y", root.getHeight() * 0.42f)));
+        setContentView(root);
+    }
+
+    private int dp(int v) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, v, getResources().getDisplayMetrics());
+    }
+
+    // ---------- Handy- oder Desktop-Ansicht ----------
+
+    /** Handy = hochkant mit Handy-Layout, Desktop = quer mit Seitenleiste wie am PC. */
+    private void applyOrientation() {
+        setRequestedOrientation(desktop
+                ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    /** Desktop: Seite wird 1280px breit gerendert und passend verkleinert → echtes Desktop-Layout. */
+    private void applyViewport() {
+        if (web == null) return;
+        WebSettings s = web.getSettings();
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
+        String content = desktop ? "width=1280" : "width=device-width, initial-scale=1, viewport-fit=cover";
+        String js = "(function(){window.__vpWanted='" + content + "';"
+                + "function f(){var m=document.querySelector('meta[name=viewport]');"
+                + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
+                + "if(m.getAttribute('content')!==window.__vpWanted)m.setAttribute('content',window.__vpWanted);}"
+                + "f();if(!window.__vpObs){window.__vpObs=new MutationObserver(f);"
+                + "window.__vpObs.observe(document.head,{childList:true,subtree:true,attributes:true});}})();";
+        web.evaluateJavascript(js, null);
+    }
+
+    private void toggleMode() {
+        desktop = !desktop;
+        prefs.edit().putBoolean("desktop", desktop).apply();
+        modeButton.setText(desktop ? "📱" : "🖥");
+        applyOrientation();
+        applyViewport();
+        web.postDelayed(() -> web.reload(), 350);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private TextView buildModeButton() {
+        TextView b = new TextView(this);
+        b.setText(desktop ? "📱" : "🖥");
+        b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        b.setGravity(Gravity.CENTER);
+        b.setAlpha(0.8f);
+        b.setContentDescription("Zwischen Handy- und Desktop-Ansicht wechseln");
+        GradientDrawable bg = new GradientDrawable();
+        bg.setShape(GradientDrawable.OVAL);
+        bg.setColor(Color.parseColor("#5865F2"));
+        bg.setStroke(dp(2), Color.parseColor("#33FFFFFF"));
+        b.setBackground(bg);
+        b.setElevation(dp(6));
+        // Antippen = umschalten, gedrückt halten und ziehen = verschieben
+        final float[] start = new float[2];
+        final boolean[] moved = new boolean[1];
+        b.setOnTouchListener((v, e) -> {
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    start[0] = e.getRawY();
+                    start[1] = v.getTranslationY();
+                    moved[0] = false;
+                    v.setAlpha(1f);
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    float dy = e.getRawY() - start[0];
+                    if (Math.abs(dy) > dp(6)) moved[0] = true;
+                    if (moved[0]) {
+                        View parent = (View) v.getParent();
+                        float max = parent.getHeight() - v.getHeight();
+                        v.setTranslationY(Math.max(0, Math.min(max, start[1] + dy)));
+                    }
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    v.setAlpha(0.8f);
+                    if (moved[0]) prefs.edit().putFloat("btn_y", v.getTranslationY()).apply();
+                    else toggleMode();
+                    return true;
+                default:
+                    return false;
+            }
+        });
+        return b;
     }
 
     /** Offline (Standard): eingebaute App. Optional: assets/live_url.txt mit einer echten Web-Adresse. */
