@@ -12,10 +12,46 @@
         font-family: system-ui, sans-serif; }
       #boot b { font-size: 26px; letter-spacing: -0.02em; }
       #boot span { color: #b5bac1; font-size: 14px; }
+      #bootErr { color: #f28b82; font-size: 12px; max-width: 320px; text-align: center; white-space: pre-wrap; }
+      #bootHelp { display: none; flex-direction: column; gap: 8px; margin-top: 10px; }
+      #bootHelp button { background: #5865f2; color: #fff; border: 0; border-radius: 999px; padding: 10px 18px; font-size: 14px; }
+      #bootHelp button.ghost { background: #1e1f22; }
     </style>
   </head>
   <body class="bg-bg text-fg">
-    <div id="boot"><b>@social</b><span>Wird gestartet …</span></div>
+    <div id="boot">
+      <b>@social</b><span id="bootMsg">Wird gestartet …</span><div id="bootErr"></div>
+      <div id="bootHelp">
+        <button id="bootMem">Ohne Speichern starten</button>
+        <button id="bootReset" class="ghost">Daten zurücksetzen &amp; neu laden</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        window.__bootLog = function (t) { var s = document.getElementById("bootMsg"); if (s) s.textContent = t; };
+        function err(t) { var d = document.getElementById("bootErr"); if (d && document.getElementById("boot")) d.textContent += t + "\n"; }
+        window.addEventListener("error", function (e) {
+          var src = e.target && (e.target.src || e.target.href);
+          err(src ? "Datei konnte nicht laden: " + src : "Fehler: " + (e.message || e.type));
+        }, true);
+        window.addEventListener("unhandledrejection", function (e) {
+          err("Fehler: " + (e.reason && (e.reason.message || e.reason)));
+        });
+        setTimeout(function () {
+          if (!document.getElementById("boot")) return;
+          document.getElementById("bootHelp").style.display = "flex";
+          window.__bootLog("Das dauert ungewöhnlich lange …");
+        }, 12000);
+        document.getElementById("bootMem").onclick = function () {
+          try { localStorage.setItem("social-memdb", "1"); } catch (e) {}
+          location.reload();
+        };
+        document.getElementById("bootReset").onclick = function () {
+          try { localStorage.removeItem("social-memdb"); indexedDB.deleteDatabase("/pglite/social-offline"); indexedDB.deleteDatabase("social-offline"); } catch (e) {}
+          setTimeout(function () { location.reload(); }, 400);
+        };
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/offline/main.tsx"></script>
   </body>

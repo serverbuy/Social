@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.webkit.JavascriptInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -35,7 +36,7 @@ public class MainActivity extends Activity {
     private static final String LOCAL_URL = "https://" + LOCAL_HOST + "/";
     private WebView web;
     private SharedPreferences prefs;
-    private boolean desktop;
+    private String mode = "portrait";
     private TextView modeButton;
     private ValueCallback<Uri[]> fileCallback;
     private static final int FILE_CHOOSER = 1001;
@@ -49,9 +50,10 @@ public class MainActivity extends Activity {
         w.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
         prefs = getSharedPreferences("social_app", MODE_PRIVATE);
-        desktop = prefs.getBoolean("desktop", false);
+        mode = prefs.getString("mode", prefs.getBoolean("desktop", false) ? "desktop" : "portrait");
         applyOrientation();
 
+        WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
         web.setBackgroundColor(Color.parseColor("#313338"));
         WebSettings s = web.getSettings();
@@ -143,7 +145,9 @@ public class MainActivity extends Activity {
         FrameLayout root = new FrameLayout(this);
         root.addView(web, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        web.addJavascriptInterface(new Bridge(), "SocialApp");
         modeButton = buildModeButton();
+        modeButton.setVisibility(prefs.getBoolean("show_button", false) ? View.VISIBLE : View.GONE);
         int size = dp(42);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size, Gravity.END | Gravity.TOP);
         lp.setMargins(0, 0, dp(6), 0);
@@ -159,10 +163,41 @@ public class MainActivity extends Activity {
     // ---------- Handy- oder Desktop-Ansicht ----------
 
     /** Handy = hochkant mit Handy-Layout, Desktop = quer mit Seitenleiste wie am PC. */
+    private boolean isDesktop() { return "desktop".equals(mode); }
+
     private void applyOrientation() {
-        setRequestedOrientation(desktop
-                ? ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        int o;
+        switch (mode) {
+            case "auto": o = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR; break;
+            case "landscape":
+            case "desktop": o = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE; break;
+            default: o = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        }
+        setRequestedOrientation(o);
+    }
+
+    /** Wird aus den Einstellungen der Web-App aufgerufen (window.SocialApp). */
+    private class Bridge {
+        @JavascriptInterface public String getMode() { return mode; }
+        @JavascriptInterface public void setMode(String m) { runOnUiThread(() -> changeMode(m)); }
+        @JavascriptInterface public boolean getButton() { return prefs.getBoolean("show_button", false); }
+        @JavascriptInterface public void setButton(boolean show) {
+            runOnUiThread(() -> {
+                prefs.edit().putBoolean("show_button", show).apply();
+                modeButton.setVisibility(show ? View.VISIBLE : View.GONE);
+            });
+        }
+    }
+
+    private void changeMode(String m) {
+        if (m == null || m.equals(mode)) return;
+        boolean wasDesktop = isDesktop();
+        mode = m;
+        prefs.edit().putString("mode", mode).apply();
+        modeButton.setText(isDesktop() ? "📱" : "🖥");
+        applyOrientation();
+        applyViewport();
+        if (wasDesktop != isDesktop()) web.postDelayed(() -> web.reload(), 350);
     }
 
     /** Desktop: Seite wird 1280px breit gerendert und passend verkleinert → echtes Desktop-Layout. */
@@ -171,7 +206,7 @@ public class MainActivity extends Activity {
         WebSettings s = web.getSettings();
         s.setUseWideViewPort(true);
         s.setLoadWithOverviewMode(true);
-        String content = desktop ? "width=1280" : "width=device-width, initial-scale=1, viewport-fit=cover";
+        String content = isDesktop() ? "width=1280" : "width=device-width, initial-scale=1, viewport-fit=cover";
         String js = "(function(){window.__vpWanted='" + content + "';"
                 + "function f(){var m=document.querySelector('meta[name=viewport]');"
                 + "if(!m){m=document.createElement('meta');m.name='viewport';document.head.appendChild(m);}"
@@ -182,18 +217,13 @@ public class MainActivity extends Activity {
     }
 
     private void toggleMode() {
-        desktop = !desktop;
-        prefs.edit().putBoolean("desktop", desktop).apply();
-        modeButton.setText(desktop ? "📱" : "🖥");
-        applyOrientation();
-        applyViewport();
-        web.postDelayed(() -> web.reload(), 350);
+        changeMode(isDesktop() ? "portrait" : "desktop");
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private TextView buildModeButton() {
         TextView b = new TextView(this);
-        b.setText(desktop ? "📱" : "🖥");
+        b.setText(isDesktop() ? "📱" : "🖥");
         b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         b.setGravity(Gravity.CENTER);
         b.setAlpha(0.8f);

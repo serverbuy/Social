@@ -17,7 +17,11 @@ const router = getRouter();
 const rootEl = document.getElementById("root")!;
 
 ensureDbReady()
-  .catch((e) => console.error("[offline] DB-Start fehlgeschlagen", e))
+  .catch((e) => {
+    console.error("[offline] DB-Start fehlgeschlagen", e);
+    const d = document.getElementById("bootErr");
+    if (d) d.textContent += `Datenbank: ${(e as Error)?.message ?? e}\n`;
+  })
   .finally(() => {
     document.getElementById("boot")?.remove();
     createRoot(rootEl).render(

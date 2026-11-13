@@ -22,12 +22,47 @@ const identity = (v: string) => v;
 let pgPromise: Promise<PGlite> | null = null;
 let sqlPromise: Promise<Sql> | null = null;
 
-async function openDb(): Promise<PGlite> {
-  const pg = new PGlite("idb://social-offline", {
+declare global { interface Window { __bootLog?: (t: string) => void; __dbMode?: string } }
+const log = (t: string) => { try { window.__bootLog?.(t); } catch { /* egal */ } };
+
+function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error(`${what} hat zu lange gedauert`)), ms);
+    p.then((v) => { clearTimeout(t); resolve(v); }, (e) => { clearTimeout(t); reject(e); });
+  });
+}
+
+async function createPg(persist: boolean): Promise<PGlite> {
+  const opts = {
     parsers: { [OID_INT8]: Number, [OID_DATE]: identity, [OID_INTERVAL]: identity },
     relaxedDurability: true,
-  });
+  };
+  const pg = persist ? new PGlite("idb://social-offline", opts) : new PGlite(opts);
   await pg.waitReady;
+  return pg;
+}
+
+async function openDb(): Promise<PGlite> {
+  let memOnly = false;
+  try { memOnly = localStorage.getItem("social-memdb") === "1"; } catch { /* egal */ }
+  let pg: PGlite;
+  if (memOnly) {
+    log("Datenbank wird gestartet (ohne Speichern) …");
+    pg = await createPg(false);
+    window.__dbMode = "memory";
+  } else {
+    log("Datenbank wird gestartet …");
+    try {
+      pg = await withTimeout(createPg(true), 20000, "Speicher öffnen");
+      window.__dbMode = "idb";
+    } catch (e) {
+      console.warn("[offline] Dauerhafter Speicher geht nicht – nutze Arbeitsspeicher", e);
+      log("Speicher geht nicht – starte ohne Speichern …");
+      pg = await createPg(false);
+      window.__dbMode = "memory";
+    }
+  }
+  log("Daten werden eingerichtet …");
   await pg.exec(
     "create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())",
   );

@@ -24,6 +24,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AppViewSettings } from "@/components/app-view-settings";
 import { useTheme } from "@/components/layout/theme-context";
 import { useI18n } from "@/components/layout/i18n-context";
 import { useMe } from "@/components/layout/me-context";
@@ -712,6 +713,8 @@ function SettingsPage() {
                 ) : null}
               </Group>
             ) : null}
+
+            <AppViewSettings />
 
             {show("server") ? (
               <Group title="Server">
