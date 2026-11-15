@@ -175,6 +175,20 @@ export default defineConfig(({ command, isPreview }) => ({
             preset:
               process.env.NITRO_PRESET ||
               (process.env.WORKERS_CI ? "cloudflare-module" : "vercel"),
+            // Cloudflare: forward app config set as *build* variables in the
+            // dashboard to the Worker's runtime, so it works whichever of the
+            // two "Variables and Secrets" panels was used. keep_vars leaves any
+            // runtime variables set in the dashboard untouched.
+            cloudflare: {
+              wrangler: {
+                keep_vars: true,
+                vars: Object.fromEntries(
+                  ["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL"]
+                    .map((k) => [k, process.env[k]?.trim()])
+                    .filter((e): e is [string, string] => Boolean(e[1])),
+                ),
+              },
+            },
             // Auto-registers server/middleware/* (the PWA install page +
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
