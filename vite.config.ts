@@ -170,7 +170,11 @@ export default defineConfig(({ command, isPreview }) => ({
     ...(command === "build" || isPreview
       ? [
           nitro({
-            preset: process.env.NITRO_PRESET || "vercel",
+            // Cloudflare Workers Builds sets WORKERS_CI — build for Workers there even
+            // when the dashboard's build command is the plain `npm run build`.
+            preset:
+              process.env.NITRO_PRESET ||
+              (process.env.WORKERS_CI ? "cloudflare-module" : "vercel"),
             // Auto-registers server/middleware/* (the PWA install page +
             // manifest + head-tag middleware). Nitro v3 defaults serverDir to
             // false, so removing this silently unwires /?install=1 on deploys.
