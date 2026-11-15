@@ -91,10 +91,24 @@ export const authConfigured =
 // it derives the origin per-request from the (proxied) host, validated against the
 // preview allowlist, which makes the OAuth `redirect_uri` the concrete preview URL
 // the broker's preview client accepts.
-const explicitBaseURL = env("BETTER_AUTH_URL");
+// Normalised to a bare origin: a trailing slash, path or stray whitespace in
+// the dashboard value would otherwise fail Better Auth's exact origin match
+// ("Invalid origin"). Anything that isn't an http(s) URL is ignored.
+const explicitBaseURL = (() => {
+  const raw = env("BETTER_AUTH_URL")?.trim();
+  if (!raw) return undefined;
+  try {
+    const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    return u.protocol === "https:" || u.protocol === "http:" ? u.origin : undefined;
+  } catch {
+    return undefined;
+  }
+})();
 // Explicit `string[]` (not a readonly tuple) — Better Auth's DynamicBaseURLConfig
 // requires a mutable `allowedHosts: string[]`.
-const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS];
+// `*.workers.dev`: the Cloudflare Workers deploy still signs in when
+// BETTER_AUTH_URL is missing or unusable (dynamic per-request baseURL).
+const previewAllowedHosts: string[] = [...PREVIEW_ALLOWED_HOSTS, "*.workers.dev"];
 // Local `npm run dev` (port 8080 contract). Browsers may send Origin as any of
 // these for the same server — trusting only `localhost` rejects `127.0.0.1` and
 // breaks email/password with "Invalid origin".
