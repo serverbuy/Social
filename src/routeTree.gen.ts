@@ -20,6 +20,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ServersRouteImport } from './routes/servers'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ChatChannelRouteImport } from './routes/chat.$channel'
 import { Route as DmUsernameRouteImport } from './routes/dm.$username'
 import { Route as DuoIdRouteImport } from './routes/duo.$id'
@@ -86,6 +87,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatChannelRoute = ChatChannelRouteImport.update({
   id: '/$channel',
   path: '/$channel',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/servers': typeof ServersRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
   '/duo/$id': typeof DuoIdRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/servers': typeof ServersRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
   '/duo/$id': typeof DuoIdRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/servers': typeof ServersRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/api/health': typeof ApiHealthRoute
   '/chat/$channel': typeof ChatChannelRoute
   '/dm/$username': typeof DmUsernameRoute
   '/duo/$id': typeof DuoIdRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/servers'
     | '/settings'
+    | '/api/health'
     | '/chat/$channel'
     | '/dm/$username'
     | '/duo/$id'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/servers'
     | '/settings'
+    | '/api/health'
     | '/chat/$channel'
     | '/dm/$username'
     | '/duo/$id'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/servers'
     | '/settings'
+    | '/api/health'
     | '/chat/$channel'
     | '/dm/$username'
     | '/duo/$id'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ServersRoute: typeof ServersRouteWithChildren
   SettingsRoute: typeof SettingsRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   DmUsernameRoute: typeof DmUsernameRoute
   DuoIdRoute: typeof DuoIdRoute
   RankingsWorldRoute: typeof RankingsWorldRoute
@@ -375,6 +388,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat/$channel': {
@@ -506,6 +526,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ServersRoute: ServersRouteWithChildren,
   SettingsRoute: SettingsRoute,
+  ApiHealthRoute: ApiHealthRoute,
   DmUsernameRoute: DmUsernameRoute,
   DuoIdRoute: DuoIdRoute,
   RankingsWorldRoute: RankingsWorldRoute,
