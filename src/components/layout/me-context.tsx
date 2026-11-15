@@ -59,12 +59,22 @@ export function MeProvider({ children }: { children: ReactNode }) {
     }
   }, [setLang, setTheme]);
 
+  const loadedFor = useRef<string | null>(null);
+
   useEffect(() => {
     if (isPending) return;
     if (!user) {
+      loadedFor.current = null;
       setState({ ready: true, signedIn: false, profile: null });
       hydrated.current = null;
       return;
+    }
+    // A different (or freshly signed-in) user: drop the stale "signed out"
+    // state until getMe() answers. Otherwise the shell redirects to /login,
+    // /login (seeing a session) redirects back, and the two ping-pong forever.
+    if (loadedFor.current !== user.id) {
+      loadedFor.current = user.id;
+      setState({ ready: false, signedIn: false, profile: null });
     }
     void refresh();
   }, [user, isPending, refresh]);

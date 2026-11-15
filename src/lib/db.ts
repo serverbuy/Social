@@ -85,15 +85,52 @@ function toSql(run: Run): Sql {
   return sql;
 }
 
+/**
+ * Apply pending `migrations/*.sql` to the remote database at first use, so a
+ * deploy without a build-time migration step (e.g. Cloudflare) still gets the
+ * schema. Same bookkeeping table as scripts/migrate.mjs, so both can coexist.
+ */
+async function migrateRemote(pool: import("pg").Pool): Promise<void> {
+  const migrations = import.meta.glob("/migrations/*.sql", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  }) as Record<string, string>;
+  const client = await pool.connect();
+  try {
+    await client.query(
+      "create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())",
+    );
+    const done = (await client.query<{ name: string }>("select name from _migrations")).rows.map(
+      (r) => r.name,
+    );
+    for (const { name, path } of pendingMigrations(Object.keys(migrations), done)) {
+      await client.query("begin");
+      try {
+        await client.query(migrations[path]);
+        await client.query("insert into _migrations (name) values ($1)", [name]);
+        await client.query("commit");
+      } catch (err) {
+        await client.query("rollback").catch(() => undefined);
+        throw err;
+      }
+    }
+  } finally {
+    client.release();
+  }
+}
+
 function createNeonSql(): Promise<Sql> {
   globalRef.__pgSqlPromise__ ??= (async () => {
     // Regular Postgres driver: node-postgres (`pg`) — works directly with Neon's
     // pooled endpoint. One pool per process; warm serverless instances reuse it.
-    const { Pool, types } = await import("pg");
+    const { types } = await import("pg");
+    const { createPgPool } = await import("./pg-pool");
     types.setTypeParser(OID_INT8, Number);
     types.setTypeParser(OID_DATE, identity);
     types.setTypeParser(OID_INTERVAL, identity);
-    const pool = new Pool({ connectionString: databaseUrl });
+    const pool = createPgPool(databaseUrl as string);
+    await migrateRemote(pool);
     return toSql(async <T>(text: string, params: unknown[]) => {
       const res = await pool.query(text, params);
       return res.rows as T[];
@@ -220,7 +257,6 @@ export async function getPglite(): Promise<import("@electric-sql/pglite").PGlite
  * module kick it off immediately (see bottom of file).
  */
 export function ensureDbReady(): Promise<void> {
-  if (dbSource !== "pglite") return Promise.resolve();
   return getSql().then(() => undefined);
 }
 

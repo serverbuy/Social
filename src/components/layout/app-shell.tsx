@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { AvatarMark } from "@/components/mark/avatar-mark";
 import { NameBadge } from "@/components/mark/name-badge";
 import { useMe } from "./me-context";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { useI18n } from "./i18n-context";
 import type { ReactNode } from "react";
 import type { I18nKey } from "@/lib/i18n";
@@ -25,6 +26,7 @@ function BootScreen({ label }: { label: string }) {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { ready, signedIn, profile, unread } = useMe();
+  const session = useCurrentUserState();
   const { t } = useI18n();
   const navigate = useNavigate();
 
@@ -40,8 +42,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     pathname.startsWith("/duo/");
   const immersive = immersiveChat || immersivePage;
 
-  if (!ready) return <BootScreen label="…" />;
-  if (!signedIn) return <Navigate to="/login" replace />;
+  if (session.isPending) return <BootScreen label="…" />;
+  // Redirect on the real session only; /login redirects back on the same
+  // signal, so the two can never disagree and ping-pong.
+  if (!session.user) return <Navigate to="/login" replace />;
+  // Signed in, but the profile (getMe) hasn't caught up yet: wait for it.
+  if (!ready || !signedIn) return <BootScreen label="…" />;
   if (!profile) return <Navigate to="/claim" replace />;
 
   return (
