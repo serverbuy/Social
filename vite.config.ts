@@ -145,6 +145,10 @@ function authPopupPlugin(): Plugin {
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
+if (process.env.WORKERS_CI || process.env.NITRO_PRESET?.startsWith("cloudflare")) {
+  process.env.VITE_GROK_EXTENSIONS ??= "0";
+}
+
 export default defineConfig(({ command, isPreview }) => ({
   server: {
     host: "0.0.0.0",
@@ -182,11 +186,16 @@ export default defineConfig(({ command, isPreview }) => ({
             cloudflare: {
               wrangler: {
                 keep_vars: true,
-                vars: Object.fromEntries(
-                  ["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL"]
-                    .map((k) => [k, process.env[k]?.trim()])
-                    .filter((e): e is [string, string] => Boolean(e[1])),
-                ),
+                vars: {
+                  ...Object.fromEntries(
+                    ["DATABASE_URL", "BETTER_AUTH_SECRET", "BETTER_AUTH_URL"]
+                      .map((k) => [k, process.env[k]?.trim()])
+                      .filter((e): e is [string, string] => Boolean(e[1])),
+                  ),
+                  // grok.com's builder script only belongs on Grok hosting;
+                  // on our own domain it isn't needed and can misbehave.
+                  VITE_GROK_EXTENSIONS: "0",
+                },
               },
             },
             // Auto-registers server/middleware/* (the PWA install page +
